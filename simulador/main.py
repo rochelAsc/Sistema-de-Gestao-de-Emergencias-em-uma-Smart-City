@@ -1,91 +1,3 @@
-# from core.ambiente import Ambiente, FOGO, VITIMA
-# from agentes.drone import Drone
-# from agentes.bombeiro import Bombeiro
-# from agentes.socorrista_fifo import SocorristaFIFO
-# from agentes.socorrista_utilidade import SocorristaUtilidade
-# from agentes.bdi import BDI
-
-# import random
-# import time
-
-# def main():
-#     # ==========================
-#     # AMBIENTE
-#     # ==========================
-#     ambiente = Ambiente(tamanho=10)
-
-#     # ==========================
-#     # BDI
-#     # ==========================
-#     bdi = BDI()
-
-#     # ==========================
-#     # AGENTES
-#     # ==========================
-#     drones = [
-#         Drone("D1", ambiente, bdi, 0, 0),
-#         Drone("D2", ambiente, bdi, 9, 9)
-#     ]
-
-#     bombeiros = [
-#         Bombeiro("B1", ambiente, quadrante=1),
-#         Bombeiro("B2", ambiente, quadrante=2),
-#         Bombeiro("B3", ambiente, quadrante=3),
-#         Bombeiro("B4", ambiente, quadrante=4),
-#     ]
-
-#     for b in bombeiros:
-#         bdi.registrar_bombeiro(b)
-
-#     soc_fifo = SocorristaFIFO("S1", ambiente, hospital_pos=(0, 0))
-#     soc_util = SocorristaUtilidade("S2", ambiente, hospital_pos=(0, 0))
-
-#     bdi.registrar_socorristas(soc_fifo, soc_util)
-
-#     # ==========================
-#     # LOOP
-#     # ==========================
-#     for passo in range(100):
-
-#         print(f"\n===== PASSO {passo} =====")
-
-#         # 1. Gerar eventos aleatórios
-#         if random.random() < 0.3:
-#             x = random.randint(0, 9)
-#             y = random.randint(0, 9)
-#             tipo = random.choice([FOGO, VITIMA])
-#             ambiente.adicionar_incidente(x, y, tipo)
-
-#         # 2. Drones percebem
-#         for drone in drones:
-#             drone.atualizar()
-
-#         # 3. BDI decide
-#         bdi.atualizar(ambiente)
-
-#         # 4. Bombeiros agem
-#         for b in bombeiros:
-#             b.agir()
-
-#         # 5. Socorristas agem
-#         soc_fifo.agir()
-#         soc_util.agir()
-
-#         # ==========================
-#         # LOGS
-#         # ==========================
-#         print("Fogos (BDI):", list(bdi.fogos))
-#         print("Vítimas (BDI):", list(bdi.vitimas))
-
-#         print("FIFO → passos:", soc_fifo.passos, "| resgates:", soc_fifo.resgates)
-#         print("UTIL → passos:", soc_util.passos, "| resgates:", soc_util.resgates)
-
-#         time.sleep(0.2)
-
-
-# if __name__ == "__main__":
-#     main()
-
 from interface.pygame_view import PygameView
 from core.ambiente import Ambiente, FOGO, VITIMA
 from agentes.drone import Drone
@@ -97,23 +9,36 @@ from agentes.bdi import BDI
 import random
 import time
 
-def main():
-    # ==========================
-    # AMBIENTE
-    # ==========================
-    ambiente = Ambiente(tamanho=10)
+CONFIG = {
+    "FPS": 5,
+    "PROB_EVENTO": 0.3,
+    "DRONE_STEPS": 4
+}
 
-    # ==========================
-    # BDI
-    # ==========================
+def gerar_posicao_balanceada(tamanho):
+    metade = tamanho // 2
+
+    q = random.choice([1, 2, 3, 4])
+
+    if q == 1:
+        return random.randint(0, metade - 1), random.randint(0, metade - 1)
+    elif q == 2:
+        return random.randint(metade, tamanho - 1), random.randint(0, metade - 1)
+    elif q == 3:
+        return random.randint(0, metade - 1), random.randint(metade, tamanho - 1)
+    else:
+        return random.randint(metade, tamanho - 1), random.randint(metade, tamanho - 1)
+
+def main():
+    ambiente = Ambiente(tamanho=15)
     bdi = BDI()
 
-    # ==========================
-    # AGENTES
-    # ==========================
+    t = ambiente.tamanho - 1
+    centro = (ambiente.meio, ambiente.meio)
+
     drones = [
         Drone("D1", ambiente, bdi, 0, 0),
-        Drone("D2", ambiente, bdi, 9, 9)
+        Drone("D2", ambiente, bdi, 0, ambiente.tamanho // 2)
     ]
 
     bombeiros = [
@@ -126,53 +51,68 @@ def main():
     for b in bombeiros:
         bdi.registrar_bombeiro(b)
 
-    soc_fifo = SocorristaFIFO("S1", ambiente, hospital_pos=(0, 0))
-    soc_util = SocorristaUtilidade("S2", ambiente, hospital_pos=(0, 0))
+    soc_fifo = SocorristaFIFO("S1", ambiente, hospital_pos=centro)
+    soc_util = SocorristaUtilidade("S2", ambiente, hospital_pos=centro)
 
     bdi.registrar_socorristas(soc_fifo, soc_util)
 
-
     view = PygameView(ambiente)
-    # ==========================
+
     # LOOP
-    # ==========================
-    for passo in range(100):
+    for passo in range(500):
 
         print(f"\n===== PASSO {passo} =====")
 
-        # 1. Gerar eventos aleatórios
-        if random.random() < 0.3:
-            x = random.randint(0, 9)
-            y = random.randint(0, 9)
-            tipo = random.choice([FOGO, VITIMA])
-            ambiente.adicionar_incidente(x, y, tipo)
+        # Gerar eventos aleatórios
+        if random.random() < CONFIG["PROB_EVENTO"]:
+            x, y = gerar_posicao_balanceada(ambiente.tamanho)
+            
+            if (x, y) not in ambiente.incidentes:
+                tipo = random.choice([FOGO, VITIMA])
+                ambiente.adicionar_incidente(x, y, tipo)
 
-        # 2. Drones percebem
+        # Drones percebem
         for drone in drones:
-            drone.atualizar()
+            for _ in range(CONFIG["DRONE_STEPS"]):
+                drone.atualizar()
 
-        # 3. BDI decide
+        # BDI decide
         bdi.atualizar(ambiente)
 
-        # 4. Bombeiros agem
+        # Bombeiros agem
         for b in bombeiros:
             b.agir()
 
-        # 5. Socorristas agem
+        # Socorristas agem
         soc_fifo.agir()
         soc_util.agir()
 
-        # ==========================
-        # LOGS
-        # ==========================
-        print("Fogos (BDI):", list(bdi.fogos))
-        print("Vítimas (BDI):", list(bdi.vitimas))
+        # print("Fogos (BDI):", list(bdi.fogos))
+        # print("Vítimas (BDI):", list(bdi.vitimas))
 
-        print("FIFO → passos:", soc_fifo.passos, "| resgates:", soc_fifo.resgates)
-        print("UTIL → passos:", soc_util.passos, "| resgates:", soc_util.resgates)
+        # print("FIFO → passos:", soc_fifo.passos, "| resgates:", soc_fifo.resgates)
+        # print("UTIL → passos:", soc_util.passos, "| resgates:", soc_util.resgates)
+
+        print("\n===== RESULTADOS FINAIS =====")
+
+        print("\nSOCORRISTA FIFO:")
+        print("Resgates:", soc_fifo.resgates)
+        print("Passos:", soc_fifo.passos)
+
+        print("\nSOCORRISTA UTIL:")
+        print("Resgates:", soc_util.resgates)
+        print("Passos:", soc_util.passos)
+
+        # eficiência simples
+        ef_fifo = soc_fifo.resgates / (soc_fifo.passos + 1)
+        ef_util = soc_util.resgates / (soc_util.passos + 1)
+
+        print("\nEFICIÊNCIA:")
+        print("FIFO:", ef_fifo)
+        print("UTIL:", ef_util)
 
         view.desenhar(drones, bombeiros, [soc_fifo, soc_util])
-        view.tick(5)
+        view.tick(CONFIG["FPS"])
 
 
 if __name__ == "__main__":

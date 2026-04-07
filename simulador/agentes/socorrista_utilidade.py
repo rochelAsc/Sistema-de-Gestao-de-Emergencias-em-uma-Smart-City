@@ -20,11 +20,8 @@ class SocorristaUtilidade:
         return self.estado == "livre"
 
     def receber_vitima(self, vitima):
+        print(f"[SOCORRISTA UTIL {self.id}] recebeu vítima {vitima}")
         self.lista_resgates.append(vitima)
-
-    # def receber_lista(self, lista):
-    #     if not self.lista_resgates:
-    #         self.lista_resgates = lista.copy()
 
     def distancia(self, a, b):
         return math.hypot(a[0] - b[0], a[1] - b[1])
@@ -64,6 +61,7 @@ class SocorristaUtilidade:
             chegou = self.mover_passo(*self.alvo_atual)
 
             if chegou:
+                print(f"[SOCORRISTA UTIL {self.id}] chegou na vítima {self.alvo_atual}")
                 if self.ambiente.eh_vitima(*self.alvo_atual):
                     self.ambiente.resolver_incidente(*self.alvo_atual)
 
@@ -74,6 +72,7 @@ class SocorristaUtilidade:
             chegou = self.mover_passo(*self.hospital)
 
             if chegou:
+                print(f"[SOCORRISTA UTIL {self.id}] entregou vítima no hospital")
                 self.resgates += 1
                 self.estado = "livre"
                 self.alvo_atual = None
