@@ -22,6 +22,7 @@ class PygameView:
         pygame.display.set_caption("Simulação Smart City 🚑🔥")
 
         self.clock = pygame.time.Clock()
+        self.font = pygame.font.SysFont(None, 18)
 
         self.tamanho_grid = ambiente.tamanho
         self.cell_size = largura // self.tamanho_grid
@@ -39,6 +40,11 @@ class PygameView:
                     self.cell_size
                 )
                 pygame.draw.rect(self.tela, PRETO, rect, 1)
+
+    def desenhar_divisa_quadrantes(self):
+        meio_px = self.cell_size * (self.tamanho_grid // 2)
+        pygame.draw.line(self.tela, (80, 80, 80), (meio_px, 0), (meio_px, self.altura), 2)
+        pygame.draw.line(self.tela, (80, 80, 80), (0, meio_px), (self.largura, meio_px), 2)
 
     def desenhar_incidentes(self):
         for (x, y), tipo in self.ambiente.incidentes.items():
@@ -60,6 +66,7 @@ class PygameView:
         self.tela.fill(BRANCO)
 
         self.desenhar_grid()
+        self.desenhar_divisa_quadrantes()
         self.desenhar_incidentes()
 
         # drones (azul)
@@ -74,7 +81,27 @@ class PygameView:
         self.desenhar_agente(socorristas[0].x, socorristas[0].y, ROXO)   # FIFO
         self.desenhar_agente(socorristas[1].x, socorristas[1].y, PRETO)  # UTIL
 
+        self.desenhar_legenda()
+
         pygame.display.flip()
+
+    def desenhar_legenda(self):
+        itens = [
+            ("Drone (patrulha)", AZUL),
+            ("Bombeiro", VERDE),
+            ("Socorrista FIFO", ROXO),
+            ("Socorrista Utilidade", PRETO),
+            ("Fogo", LARANJA),
+            ("Vítima", VERMELHO),
+        ]
+
+        x = 10
+        y = 10
+        for label, cor in itens:
+            pygame.draw.rect(self.tela, cor, (x, y, 14, 14))
+            texto = self.font.render(label, True, PRETO)
+            self.tela.blit(texto, (x + 20, y - 2))
+            y += 20
 
     # ==========================
     # LOOP CONTROL
