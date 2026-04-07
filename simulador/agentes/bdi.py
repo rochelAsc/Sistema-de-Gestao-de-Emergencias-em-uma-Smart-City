@@ -44,41 +44,23 @@ class BDI:
         if not self.vitimas_pendentes:
             return
 
-        nova_fila = []
+        print(f"[BDI] despachando {len(self.vitimas_pendentes)} vítimas")
 
         for vitima in self.vitimas_pendentes:
 
-            fifo_livre = self.socorrista_fifo.disponivel()
-            util_livre = self.socorrista_util.disponivel()
-
-            # nenhum disponível → mantém na fila
-            if not fifo_livre and not util_livre:
-                nova_fila.append(vitima)
-                continue
-
-            # alternância inteligente
-            if self.turno == 0 and fifo_livre:
+            # alternância simples (não depende mais de disponibilidade)
+            if self.turno == 0:
                 print(f"[BDI] enviando vítima {vitima} para SOCORRISTA FIFO")
-                self.socorrista_fifo.receber_vitima(vitima) 
+                self.socorrista_fifo.receber_vitima(vitima)
                 self.turno = 1
 
-            elif self.turno == 1 and util_livre:
+            else:
                 print(f"[BDI] enviando vítima {vitima} para SOCORRISTA UTIL")
                 self.socorrista_util.receber_vitima(vitima)
                 self.turno = 0
 
-            else:
-                # fallback: manda pra quem estiver livre
-                if fifo_livre:
-                    print(f"[BDI] enviando vítima {vitima} para SOCORRISTA FIFO")
-                    self.socorrista_fifo.receber_vitima(vitima)
-                elif util_livre:
-                    print(f"[BDI] enviando vítima {vitima} para SOCORRISTA UTIL")
-                    self.socorrista_util.receber_vitima(vitima)
-                else:
-                    nova_fila.append(vitima)
-
-        self.vitimas_pendentes = nova_fila
+        # limpa fila depois de despachar tudo
+        self.vitimas_pendentes = []
 
     def despachar_bombeiros(self, ambiente):
         fogos_por_quadrante = {1: [], 2: [], 3: [], 4: []}
@@ -144,7 +126,7 @@ class BDI:
         self.vitimas_pendentes = [
             v for v in self.vitimas_pendentes if ambiente.eh_vitima(*v)
         ]
-
+        # remove fogos já apagados
         self.fogos = {f for f in self.fogos if ambiente.eh_fogo(*f)}
 
     def atualizar(self, ambiente):

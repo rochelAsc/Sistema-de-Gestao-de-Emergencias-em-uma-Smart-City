@@ -1,5 +1,3 @@
-from core.ambiente import Ambiente
-
 class Bombeiro:
     def __init__(self, id_bombeiro, ambiente, quadrante):
         self.id = id_bombeiro
@@ -52,24 +50,17 @@ class Bombeiro:
         self.passos += 1
 
     def agir(self):
+        # se não tem destino, espera ordem
         if not self.destino:
             return
 
-        if self.destino:
-            self.mover_passo()
+        self.mover_passo()
 
-            # Se chegou no destino
-            if (self.x, self.y) == self.destino:
-                if self.ambiente.eh_fogo(self.x, self.y):
-                    print(f"[BOMBEIRO {self.id}] apagou fogo em {(self.x, self.y)}")
-                    self.ambiente.resolver_incidente(self.x, self.y)
-                    
-                self.destino = None
-                self.ocupado = False
-
-        else:
-            if (self.x, self.y) != self.base:
-                self.destino = self.base
-                self.mover_passo
-            else:
-                self.destino = None
+        # Se chegou no destino
+        if (self.x, self.y) == self.destino:
+            if self.ambiente.eh_fogo(self.x, self.y):
+                print(f"[BOMBEIRO {self.id}] apagou fogo em {(self.x, self.y)}")
+                self.ambiente.resolver_incidente(self.x, self.y)
+            # libera para nova ordem    
+            self.destino = None
+            self.ocupado = False

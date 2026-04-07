@@ -41,15 +41,6 @@ class Ambiente:
         else:
             return 4                            # Canto Inferior Direito
 
-    # Sincroniza o dicionário com a grade
-    def atualizar_incidentes(self):
-        self.incidentes.clear()
-
-        for x in range(self.tamanho):
-            for y in range(self.tamanho):
-                if self.grade[x][y] != VAZIO:
-                    self.incidentes[(x, y)] = self.grade[x][y]
-
     # Adiciona um incidente na grade ('Fogo' ou 'Vítima') se a célula estiver vazia.
     def adicionar_incidente(self, x, y, tipo):
         if not self.dentro_limite(x, y):
@@ -71,24 +62,3 @@ class Ambiente:
             # remove do dicionário
             if (x, y) in self.incidentes:
                 del self.incidentes[(x, y)]
-    
-    def listar_incidentes(self):
-        fogos = []
-        vitimas = []
-
-        for (x, y), tipo in self.incidentes.items():
-            if tipo == FOGO:
-                fogos.append((x, y))
-            elif tipo == VITIMA:
-                vitimas.append((x, y))
-
-        return fogos, vitimas
-    
-    def gerar_incidentes(self, prob=0.05):
-        for x in range(self.tamanho):
-            for y in range(self.tamanho):
-                if self.grade[x][y] == VAZIO:
-                    if random.random() < prob:
-                        tipo = random.choice([FOGO, VITIMA])
-                        self.grade[x][y] = tipo
-                        self.incidentes[(x, y)] = tipo

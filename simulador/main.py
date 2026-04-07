@@ -12,7 +12,7 @@ import time
 CONFIG = {
     "FPS": 5,
     "PROB_EVENTO": 0.3,
-    "DRONE_STEPS": 4
+    "DRONE_STEPS": 1
 }
 
 def gerar_posicao_balanceada(tamanho):

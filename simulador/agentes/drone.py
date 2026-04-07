@@ -1,5 +1,4 @@
 from core.ambiente import FOGO, VITIMA
-import random
 
 class Drone:
     def __init__(self, id_drone, ambiente, bdi, x_inicial=0, y_inicial=0):
