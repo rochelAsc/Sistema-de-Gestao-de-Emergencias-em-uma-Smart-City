@@ -80,52 +80,6 @@ class BDI:
 
         self.vitimas_pendentes = nova_fila
 
-    # def despachar_bombeiros(self, ambiente):
-    #     fogos_por_quadrante = {1: [], 2: [], 3: [], 4: []}
-
-    #     for fogo in self.fogos:
-    #         q = ambiente.obter_quadrante(*fogo)
-    #         fogos_por_quadrante[q].append(fogo)
-
-    #     fogos_atribuidos = set()
-
-    #     fogos_em_atendimento = {
-    #         b.destino for b in self.bombeiros if b.destino is not None
-    #     }
-
-    #     # cada bombeiro cuida do seu quadrante
-    #     for b in self.bombeiros:
-    #         if b.ocupado:
-    #             continue
-
-    #         fogos_q = fogos_por_quadrante[b.quadrante]
-
-    #         disponiveis = [f for f in fogos_q if f not in fogos_atribuidos and f not in fogos_em_atendimento]
-    #         if disponiveis:
-    #             alvo = min(
-    #                 disponiveis,
-    #                 key=lambda f: abs(f[0] - b.x) + abs(f[1] - b.y)
-    #             )
-
-    #             fogos_atribuidos.add(alvo)
-
-    #             print(f"[BDI] enviando Bombeiro {b.id} para {alvo}")
-    #             b.receber_ordem(alvo)
-
-    #     # cooperação entre quadrantes
-    #     fogos_restantes = [
-    #         f for lista in fogos_por_quadrante.values()
-    #         for f in lista
-    #         if f not in fogos_atribuidos and f not in fogos_em_atendimento
-    #     ]
-
-    #     bombeiros_livres = [b for b in self.bombeiros if not b.ocupado]
-
-    #     for b, fogo in zip(bombeiros_livres, fogos_restantes):
-    #         print(f"[BDI] REDIRECIONANDO Bombeiro {b.id} para {fogo}")
-    #         b.receber_ordem(fogo)
-    #         fogos_atribuidos.add(fogo)
-
     def despachar_bombeiros(self, ambiente):
         fogos_por_quadrante = {1: [], 2: [], 3: [], 4: []}
 

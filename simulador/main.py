@@ -87,12 +87,6 @@ def main():
         soc_fifo.agir()
         soc_util.agir()
 
-        # print("Fogos (BDI):", list(bdi.fogos))
-        # print("Vítimas (BDI):", list(bdi.vitimas))
-
-        # print("FIFO → passos:", soc_fifo.passos, "| resgates:", soc_fifo.resgates)
-        # print("UTIL → passos:", soc_util.passos, "| resgates:", soc_util.resgates)
-
         print("\n===== RESULTADOS FINAIS =====")
 
         print("\nSOCORRISTA FIFO:")
