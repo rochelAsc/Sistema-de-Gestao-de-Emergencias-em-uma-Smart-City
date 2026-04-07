@@ -102,6 +102,8 @@ def main():
     # AMBIENTE
     # ==========================
     ambiente = Ambiente(tamanho=10)
+    meio = ambiente.tamanho // 2
+    centro_q = meio // 2
 
     # ==========================
     # BDI
@@ -112,15 +114,17 @@ def main():
     # AGENTES
     # ==========================
     drones = [
-        Drone("D1", ambiente, bdi, 0, 0),
-        Drone("D2", ambiente, bdi, 9, 9)
+        Drone("D1", ambiente, bdi, quadrante=1),
+        Drone("D2", ambiente, bdi, quadrante=2),
+        Drone("D3", ambiente, bdi, quadrante=3),
+        Drone("D4", ambiente, bdi, quadrante=4),
     ]
 
     bombeiros = [
-        Bombeiro("B1", ambiente, quadrante=1),
-        Bombeiro("B2", ambiente, quadrante=2),
-        Bombeiro("B3", ambiente, quadrante=3),
-        Bombeiro("B4", ambiente, quadrante=4),
+        Bombeiro("B1", ambiente, quadrante=1, pos_inicial=(centro_q, centro_q)),
+        Bombeiro("B2", ambiente, quadrante=2, pos_inicial=(meio + centro_q, centro_q)),
+        Bombeiro("B3", ambiente, quadrante=3, pos_inicial=(centro_q, meio + centro_q)),
+        Bombeiro("B4", ambiente, quadrante=4, pos_inicial=(meio + centro_q, meio + centro_q)),
     ]
 
     for b in bombeiros:
