@@ -1,18 +1,20 @@
 from core.ambiente import Ambiente
 
 class Bombeiro:
-    def __init__(self, id_bombeiro, ambiente, quadrante):
+    def __init__(self, id_bombeiro, ambiente, quadrante, pos_inicial=(0, 0)):
         self.id = id_bombeiro
         self.ambiente = ambiente
         self.quadrante = quadrante
 
-        self.x = 0
-        self.y = 0
+        self.x, self.y = pos_inicial
 
         self.destino = None
         self.ocupado = False
 
         self.passos = 0
+
+    def disponivel(self):
+        return not self.ocupado
 
     def receber_ordem(self, pos):
         self.destino = pos

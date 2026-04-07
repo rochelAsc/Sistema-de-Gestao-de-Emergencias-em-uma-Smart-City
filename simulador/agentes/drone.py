@@ -1,35 +1,57 @@
 from core.ambiente import Ambiente
-import random
 
 class Drone:
-    def __init__(self, id_drone, ambiente, bdi, x_inicial=0, y_inicial=0):
+    def __init__(self, id_drone, ambiente, bdi, quadrante=None):
         self.id = id_drone
         self.ambiente = ambiente
         self.bdi = bdi
 
-        self.x = x_inicial
-        self.y = y_inicial
+        self.quadrante = quadrante
+
+        self.rota = self._gerar_rota_patrol()
+        self.idx_rota = 0
+
+        # posiciona no primeiro ponto da rota
+        self.x, self.y = self.rota[0]
 
         # Métrica simples
         self.passos = 0
 
+    def _limites_quadrante(self):
+        n = self.ambiente.tamanho
+        meio = n // 2
+
+        if self.quadrante == 1:
+            return range(0, meio), range(0, meio)
+        if self.quadrante == 2:
+            return range(meio, n), range(0, meio)
+        if self.quadrante == 3:
+            return range(0, meio), range(meio, n)
+        if self.quadrante == 4:
+            return range(meio, n), range(meio, n)
+
+        # fallback: toda a grade
+        return range(0, n), range(0, n)
+
+    def _gerar_rota_patrol(self):
+        xs, ys = self._limites_quadrante()
+        rota = []
+
+        # varredura em serpentina para cobrir a área de forma determinística
+        for i, x in enumerate(xs):
+            linha = list(ys)
+            if i % 2 == 1:
+                linha.reverse()
+            for y in linha:
+                rota.append((x, y))
+
+        # garante que haja pelo menos um ponto
+        return rota if rota else [(0, 0)]
+
     def mover(self):
-        direcoes = [
-            (0, 1),     # baixo
-            (0, -1),    # cima
-            (1, 0),     # direita
-            (-1, 0)     # esqueda
-        ]
-
-        dx, dy = random.choice(direcoes)
-
-        novo_x = self.x + dx
-        novo_y = self.y + dy
-
-        if self.ambiente.dentro_limite(novo_x, novo_y):
-            self.x = novo_x
-            self.y = novo_y
-            self.passos += 1
+        self.idx_rota = (self.idx_rota + 1) % len(self.rota)
+        self.x, self.y = self.rota[self.idx_rota]
+        self.passos += 1
 
     def perceber(self):
         pos = (self.x, self.y)

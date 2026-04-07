@@ -199,9 +199,39 @@ class BDI:
 
         self.vitimas_pendentes = nova_fila
 
+    def despachar_bombeiros(self, ambiente):
+        if not self.fogos:
+            return
+
+        fogos_por_quadrante = {1: [], 2: [], 3: [], 4: []}
+        for fogo in self.fogos:
+            q = ambiente.obter_quadrante(*fogo)
+            if q:
+                fogos_por_quadrante[q].append(fogo)
+
+        for q, fogos in fogos_por_quadrante.items():
+            if not fogos:
+                continue
+
+            bombeiros_q = [b for b in self.bombeiros if b.quadrante == q]
+            titular = bombeiros_q[0] if bombeiros_q else None
+
+            # titular atende o primeiro fogo do seu quadrante
+            if titular and titular.disponivel():
+                titular.receber_ordem(fogos[0])
+
+            # regra de exceção: mais de um foco → buscar reforço livre
+            if len(fogos) > 1:
+                livres = [b for b in self.bombeiros if b.disponivel() and b is not titular]
+                for fogo_extra, bombeiro_livre in zip(fogos[1:], livres):
+                    bombeiro_livre.receber_ordem(fogo_extra)
+
     def limpar_conhecimento(self, ambiente):
         # Remove vítimas que não existem mais
         self.vitimas = {v for v in self.vitimas if ambiente.eh_vitima(*v)}
+
+        # Remove fogos já apagados
+        self.fogos = {f for f in self.fogos if ambiente.eh_fogo(*f)}
 
         # Também limpa pendentes
         self.vitimas_pendentes = [
@@ -213,6 +243,7 @@ class BDI:
     # ==========================
     def atualizar(self, ambiente):
         self.limpar_conhecimento(ambiente)
+        self.despachar_bombeiros(ambiente)
         self.despachar_socorristas()
 
     # ==========================
